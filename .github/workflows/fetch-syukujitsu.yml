@@ -1,0 +1,39 @@
+name: fetch-syukujitsu
+
+on:
+  schedule:
+    - cron: 0 15 1 3 *
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - "**/*.ts"
+      - ".github/workflows/**"
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch
+        run: npx tsx index.ts
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --staged --quiet || (git commit -m "update syukujitsu on $(TZ='Asia/Tokyo' date '+%Y-%m-%d')" && git push)
