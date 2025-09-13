@@ -1,6 +1,16 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { parse } from "csv-parse/sync";
 
+function formatDate(date: Date) {
+  return date
+    .toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    .replaceAll("/", "-");
+}
+
 (async () => {
   const response = await fetch(
     "https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv",
@@ -25,7 +35,7 @@ import { parse } from "csv-parse/sync";
     const date = record[dateKey];
     const name = record[nameKey];
     if (date && name && targetYears.some((year) => date.startsWith(year))) {
-      syukujitsu[date] = name;
+      syukujitsu[formatDate(new Date(date))] = name;
     }
   }
 
